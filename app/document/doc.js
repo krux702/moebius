@@ -768,6 +768,18 @@ class TextModeDoc extends events.EventEmitter {
         if (connection) connection.ice_colors(doc.ice_colors);
     }
 
+    set_palette(palette) {
+        // Always store a private clone so we never mutate the shared ega/c64
+        // constants, and so future edits are isolated to this document.
+        doc.palette = libtextmode.clone_palette(palette);
+        this.start_rendering().then(() => this.emit("update_swatches"));
+        if (!connection) send("document_changed");
+    }
+
+    reset_palette() {
+        this.set_palette(libtextmode.has_c64_palette(doc.palette) ? libtextmode.c64 : libtextmode.ega);
+    }
+
     at(x, y) {
         if (x < 0 || x >= doc.columns || y < 0 || y >= doc.rows) return;
         return doc.data[y * doc.columns + x];
@@ -1130,6 +1142,8 @@ class TextModeDoc extends events.EventEmitter {
         on("get_canvas_size", (event) => send_sync("get_canvas_size", {columns: doc.columns, rows: doc.rows}));
         on("set_canvas_size", (event, {columns, rows}) => this.resize(columns, rows));
         on("set_sauce_info", (event, {title, author, group, comments}) => this.set_sauce(title, author, group, comments));
+        on("update_palette", (event, {palette}) => this.set_palette(palette));
+        on("reset_palette", (event) => this.reset_palette());
         on("mirror_mode", (event, value) => this.mirror_mode = value);
         chat.on("goto_row", (line_no) => this.emit("goto_row", line_no));
     }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <title>Edit Palette</title>
+    <link rel = "stylesheet" href = "../css/global.css">
+    <link rel = "stylesheet" href = "../css/edit_palette.css">
+    <script src = "../modals/edit_palette.js"></script>
+</head>
+<body class = "dark">
+    <div id = "edit_palette_requester">
+        <div id = "swatches"></div>
+        <div id = "sliders">
+            <div class = "slider_row">
+                <label for = "red">Red</label>
+                <input id = "red" type = "range" min = "0" max = "255" value = "0">
+                <input id = "red_value" type = "number" min = "0" max = "255" value = "0" autocomplete = "off">
+            </div>
+            <div class = "slider_row">
+                <label for = "green">Green</label>
+                <input id = "green" type = "range" min = "0" max = "255" value = "0">
+                <input id = "green_value" type = "number" min = "0" max = "255" value = "0" autocomplete = "off">
+            </div>
+            <div class = "slider_row">
+                <label for = "blue">Blue</label>
+                <input id = "blue" type = "range" min = "0" max = "255" value = "0">
+                <input id = "blue_value" type = "number" min = "0" max = "255" value = "0" autocomplete = "off">
+            </div>
+            <div class = "slider_row">
+                <label for = "hex">Hex</label>
+                <input id = "hex" type = "text" maxlength = "7" value = "#000000" autocomplete = "off" spellcheck = "false">
+                <div id = "preview"></div>
+            </div>
+        </div>
+        <div id = "button_container">
+            <button id = "cancel" type = "button">Cancel</button>
+            <button id = "reset" type = "button">Reset</button>
+            <button id = "ok" class = "default" type = "button">Update</button>
+        </div>
+        <p class = "note">Note: Colors are converted to nearest VGA 6-bit (262,144 colors). The palette is stored in the file's SAUCE record.</p>
+    </div>
+</body>
+</html>

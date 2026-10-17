@@ -122,6 +122,10 @@ class PaletteChooser extends events.EventEmitter {
         send_sync("select_attribute", {fg: this.fg, bg: this.bg, palette: doc.palette});
     }
 
+    edit_palette() {
+        send_sync("edit_palette", {palette: doc.palette});
+    }
+
     constructor() {
         super();
         this.fg_value = 7;
@@ -146,6 +150,7 @@ class PaletteChooser extends events.EventEmitter {
         });
         keyboard.on("toggle_fg", (num) => this.toggle_fg(num));
         keyboard.on("toggle_bg", (num) => this.toggle_bg(num));
+        on("edit_palette", (event) => this.edit_palette());
     }
 }
 

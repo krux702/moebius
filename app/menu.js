@@ -297,6 +297,9 @@ function colors_menu_template(win) {
             {type: "separator"},
             {label: "Use iCE Colors", id: "ice_colors", accelerator: "CmdorCtrl+E", click(item) {win.send("ice_colors", item.checked);}, type: "checkbox", checked: false},
             {type: "separator"},
+            {label: "Edit Palette\u2026", id: "edit_palette", click(item) {win.send("edit_palette");}},
+            {label: "Reset Palette", id: "reset_palette", click(item) {win.send("reset_palette");}},
+            {type: "separator"},
             {label: "Remove iCE Colors as New Document", id: "remove_ice_colors", click(item) {win.send("remove_ice_colors");}},
         ]
     };

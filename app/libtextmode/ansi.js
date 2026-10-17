@@ -418,6 +418,8 @@ class Ansi extends Textmode {
         }
         if (this.font_name == "C64 PETSCII unshifted" || this.font_name == "C64 PETSCII shifted") {
             this.palette = c64;
+        } else if (this.sauce_palette) {
+            this.palette = this.sauce_palette;
         } else {
             this.palette = ega;
         }

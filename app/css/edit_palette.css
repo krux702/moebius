@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+    user-select: none;
+    overflow: hidden;
+}
+
+#edit_palette_requester {
+    font-size: 13px;
+    width: 100%;
+    color: white;
+    box-sizing: border-box;
+    padding: 12px 16px;
+}
+
+p.note {
+    margin: 12px 2px 12px 2px;
+    font-size: 13px;
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+#swatches {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-auto-rows: 28px;
+    gap: 3px;
+    margin-bottom: 14px;
+}
+
+.palette_swatch {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.palette_swatch.selected {
+    border: 2px solid white;
+    box-shadow: 0 0 0 1px black;
+}
+
+#sliders {
+    margin-bottom: 8px;
+}
+
+.slider_row {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+}
+
+.slider_row label {
+    width: 48px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.slider_row input[type=range] {
+    flex: 1;
+    margin: 0 10px 0 0;
+}
+
+.slider_row input[type=number] {
+    width: 56px;
+    background: none;
+    outline: none;
+    color: white;
+    border: 1px solid var(--mid-color);
+    padding: 4px;
+    border-radius: 3px;
+}
+
+#hex {
+    flex: 1;
+    background: none;
+    outline: none;
+    color: white;
+    border: 1px solid var(--mid-color);
+    padding: 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-right: 10px;
+}
+
+#hex.illegal {
+    border-color: rgba(255, 0, 0, 0.8);
+    background-color: rgba(255, 0, 0, 0.3);
+}
+
+#preview {
+    width: 40px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+}
+
+#button_container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+button {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    background: none;
+    color: white;
+    padding: 6px 12px;
+    margin-left: 8px;
+    outline: none;
+    transition-property: background-color;
+    transition-duration: 20ms;
+    transition-timing-function: linear;
+    cursor: pointer;
+}
+
+button.default {
+    border-color: white;
+}
+
+button:active {
+    border: 1px solid white;
+    background-color: var(--dark-mid-color);
+}
+
+#cancel {
+    margin-right: auto;
+    margin-left: 0;
+}

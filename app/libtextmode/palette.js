@@ -43,6 +43,14 @@ function convert_6bits_to_8bits(value) {
     return (value << 2) | ((value & 0x30) >> 4);
 }
 
+function convert_8bits_to_6bits(value) {
+    return value >> 2;
+}
+
+function clone_palette(palette) {
+    return palette.map((rgb) => ({r: rgb.r, g: rgb.g, b: rgb.b}));
+}
+
 function convert_ega_to_vga(rgb) {
     return {
         r: convert_6bits_to_8bits(rgb.r),
@@ -73,4 +81,78 @@ function has_c64_palette(palette) {
     return true;
 }
 
-module.exports = {white, bright_white, ega, c64, get_rgba, convert_ega_to_vga, convert_ega_to_style, has_ansi_palette, has_c64_palette};
+// A custom 16-colour palette is one that matches neither the default EGA nor
+// C64 palette, and so needs to be persisted (we store it in SAUCE comments).
+function has_custom_palette(palette) {
+    return palette != undefined && palette.length == 16 && !has_ansi_palette(palette) && !has_c64_palette(palette);
+}
+
+// Custom palettes are stored in the SAUCE comment block. Each palette is
+// written across two comment lines, each tagged with a recognisable prefix so
+// they can be separated from genuine user comments on load:
+//
+//   MBPAL0RRGGBBRRGGBB...   (colours 0-7,  as 8-bit VGA hex)
+//   MBPAL1RRGGBBRRGGBB...   (colours 8-15, as 8-bit VGA hex)
+//
+// Each line is 5 (prefix) + 1 (part) + 8*6 (hex) = 54 characters, comfortably
+// within the 64 character SAUCE comment line limit.
+const PALETTE_COMMENT_PREFIX = "MBPAL";
+
+function byte_to_hex(value) {
+    return value.toString(16).toUpperCase().padStart(2, "0");
+}
+
+function encode_palette_comments(palette) {
+    const lines = [];
+    for (let part = 0; part < 2; part++) {
+        let line = PALETTE_COMMENT_PREFIX + part;
+        for (let i = part * 8; i < part * 8 + 8; i++) {
+            const rgb = palette[i];
+            line += byte_to_hex(convert_6bits_to_8bits(rgb.r)) + byte_to_hex(convert_6bits_to_8bits(rgb.g)) + byte_to_hex(convert_6bits_to_8bits(rgb.b));
+        }
+        lines.push(line);
+    }
+    return lines;
+}
+
+function is_palette_comment_line(line) {
+    return typeof line == "string" && line.startsWith(PALETTE_COMMENT_PREFIX);
+}
+
+function decode_palette_comments(comments) {
+    if (!comments) return undefined;
+    const palette = new Array(16);
+    let parts_found = 0;
+    for (const line of comments.split("\n")) {
+        if (!is_palette_comment_line(line)) continue;
+        const part = parseInt(line.charAt(PALETTE_COMMENT_PREFIX.length), 10);
+        if (part != 0 && part != 1) continue;
+        const hex = line.substr(PALETTE_COMMENT_PREFIX.length + 1);
+        if (hex.length < 48) continue;
+        let ok = true;
+        for (let i = 0; i < 8; i++) {
+            const offset = i * 6;
+            const r = parseInt(hex.substr(offset, 2), 16);
+            const g = parseInt(hex.substr(offset + 2, 2), 16);
+            const b = parseInt(hex.substr(offset + 4, 2), 16);
+            if (isNaN(r) || isNaN(g) || isNaN(b)) {
+                ok = false;
+                break;
+            }
+            palette[part * 8 + i] = {r: convert_8bits_to_6bits(r), g: convert_8bits_to_6bits(g), b: convert_8bits_to_6bits(b)};
+        }
+        if (ok) parts_found++;
+    }
+    if (parts_found == 0) return undefined;
+    for (let i = 0; i < 16; i++) {
+        if (!palette[i]) return undefined;
+    }
+    return palette;
+}
+
+function strip_palette_comments(comments) {
+    if (!comments) return comments;
+    return comments.split("\n").filter((line) => !is_palette_comment_line(line)).join("\n");
+}
+
+module.exports = {white, bright_white, ega, c64, get_rgba, convert_6bits_to_8bits, convert_8bits_to_6bits, clone_palette, convert_ega_to_vga, convert_ega_to_style, has_ansi_palette, has_c64_palette, has_custom_palette, encode_palette_comments, decode_palette_comments, strip_palette_comments};

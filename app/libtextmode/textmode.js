@@ -1,3 +1,5 @@
+const {has_custom_palette, encode_palette_comments, decode_palette_comments, strip_palette_comments} = require("./palette");
+
 function $(name) {
     return document.getElementById(name);
 }
@@ -109,6 +111,14 @@ function add_sauce_bytes({doc, data_type, file_type, bytes: file_bytes}) {
     bytes[92] = (file_bytes.length >> 16) & 0xff;
     bytes[93] = file_bytes.length >> 24;
     bytes[94] = data_type;
+    // Combine the user's comments with the custom palette (if any), stored as
+    // extra tagged comment lines. We always strip any pre-existing palette
+    // lines from the user comments first so they don't accumulate on re-save.
+    let comments = strip_palette_comments(doc.comments) || "";
+    if (has_custom_palette(doc.palette)) {
+        const palette_lines = encode_palette_comments(doc.palette);
+        comments = comments.length ? `${comments}\n${palette_lines.join("\n")}` : palette_lines.join("\n");
+    }
     if (data_type == data_type_types.BIN) {
         bytes[95] = doc.columns / 2;
     } else {
@@ -118,7 +128,7 @@ function add_sauce_bytes({doc, data_type, file_type, bytes: file_bytes}) {
         bytes[98] = doc.rows & 0xff;
         bytes[99] = doc.rows >> 8;
     }
-    bytes[104] = comments_length(doc.comments);
+    bytes[104] = comments_length(comments);
     if (data_type != data_type_types.XBIN) {
         if (doc.ice_colors) {
             bytes[105] = 1;
@@ -131,7 +141,7 @@ function add_sauce_bytes({doc, data_type, file_type, bytes: file_bytes}) {
         bytes[105] += 1 << 4;
         if (doc.font_name) add_text(bytes, 106, doc.font_name, doc.font_name.length);
     }
-    if (doc.comments.length) bytes = add_comments_bytes(doc.comments, bytes);
+    if (comments.length) bytes = add_comments_bytes(comments, bytes);
     const merged_bytes = new Int8Array(file_bytes.length + 1 + bytes.length);
     merged_bytes.set(file_bytes, 0);
     merged_bytes[file_bytes.length] = 26;
@@ -212,6 +222,11 @@ class Textmode {
         this.use_9px_font = sauce.use_9px_font;
         this.font_name = sauce.font_name;
         this.comments = sauce.comments;
+        // A custom palette may be stored in the SAUCE comment block. Decode it
+        // (subclasses decide whether to honour it) and hide those lines from
+        // the user-visible comments.
+        this.sauce_palette = decode_palette_comments(this.comments);
+        this.comments = strip_palette_comments(this.comments);
         this.bytes = bytes.subarray(0, this.filesize);
     }
 }
